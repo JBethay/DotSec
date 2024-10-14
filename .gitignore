@@ -1,0 +1,55 @@
+# Build Folders
+bin/
+obj/
+out/
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.ide
+
+# Visual Studio Code
+.vscode/
+
+# Rider
+.idea/
+*.sln.iml
+
+# Visual Studio
+.vs/
+*.ncb
+*.sdf
+*.opensdf
+*.sln.docstates
+
+# NuGet Packages
+*.nupkg
+*.snupkg
+packages/
+*.exe
+*.dll
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+*.pid
+
+# Database files
+*.mdf
+*.ldf
+*.sqlite
+
+# Environment files
+.env
+*.env
+
+# Mac system files
+.DS_Store
+
+# Windows system files
+Thumbs.db
