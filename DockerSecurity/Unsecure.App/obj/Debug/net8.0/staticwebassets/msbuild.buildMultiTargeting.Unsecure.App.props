@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="../build/Unsecure.App.props" />
+</Project>
