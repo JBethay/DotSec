@@ -90,7 +90,7 @@ This endpoint requires a valid JWT token and a valid userId Guid. It critically 
 
 ## BOPLA (Broken Object Property Level Authorization)
 <details>
-<summary>BOLA Details</summary>
+<summary>BOPLA Details</summary>
 <a href="https://owasp.org/API-Security/editions/2023/en/0xa3-broken-object-property-level-authorization/">BOPLA</a>, <a href="https://cwe.mitre.org/data/definitions/213.html">CWE-213: Exposure of Sensitive Information Due to Incompatible Policies</a>, <a href="https://cwe.mitre.org/data/definitions/915.html">CWE-915: Improperly Controlled Modification of Dynamically-Determined Object Attributes</a>. This project demonstrates a typical BOPLA vulnerability, like BOLA this issue is frequently not detected by static code analysis. Navigate to <a href="http://localhost:YOURPORT/swagger/index.html">http://localhost:YOURPORT/swagger/index.html</a> to explore 4 endpoints:
 
 `/api/unsecure/details`
