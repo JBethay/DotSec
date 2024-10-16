@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<MyDbContext>(options =>
@@ -62,7 +63,10 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options => {
+    options.AddPolicy("AdminAccess", policy =>
+    policy.RequireClaim("AdminAccess", "true"));
+});
 
 var app = builder.Build();
 
@@ -77,15 +81,15 @@ using (var scope = app.Services.CreateScope())
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapPost("/api/unsecure/details", async (UserUnsecure user, MyDbContext db) =>
+app.MapPost("/api/unsecure/details", async (MyDbContext db) =>
 {
     try
     {
-        var foundUser = await db.UsersUnsecure.FirstOrDefaultAsync(_ => _.Id == user.Id);
+        var foundUser = await db.Users.FirstOrDefaultAsync();
 
         if (foundUser != null)
         {
-            return Results.Ok(new { username = foundUser.Email });
+            return Results.Ok(foundUser);
         }
         else
         {
@@ -98,30 +102,15 @@ app.MapPost("/api/unsecure/details", async (UserUnsecure user, MyDbContext db) =
     }
 }).WithName("unsecure").WithOpenApi();
 
-//Note: you should never ever have something like this in a real app, I am only adding it so you can easily get the Guids. 
-app.MapPost("/api/dangerous/getallusers", async (MyDbContext db) =>
+app.MapPost("/api/details", async (MyDbContext db) =>
 {
     try
     {
-        var users = await db.Users.ToListAsync();
-
-        return Results.Ok(users.Select(_ => _.UserId).ToList());
-    }
-    catch
-    {
-        return Results.Problem(statusCode: 500);
-    }
-}).WithName("get all user ids [dangerous]").WithOpenApi();
-
-app.MapPost("/api/details", async (User user, MyDbContext db) =>
-{
-    try
-    {
-        var foundUser = await db.Users.FirstOrDefaultAsync(_ => _.UserId == user.UserId);
+        var foundUser = await db.Users.FirstOrDefaultAsync();
 
         if (foundUser != null)
         {
-            return Results.Ok(new { username = foundUser.Email });
+            return Results.Ok(new UserDetails { UserName = foundUser.UserName });
         }
         else
         {
@@ -134,20 +123,15 @@ app.MapPost("/api/details", async (User user, MyDbContext db) =>
     }
 }).WithName("more secure").WithOpenApi();
 
-app.MapPost("/api/secure/details", async (User user, MyDbContext db, HttpContext httpContext) =>
+app.MapPost("/api/secure/details", async (MyDbContext db, HttpContext httpContext) =>
 {
     try
     {
-        var foundUser = await db.Users.FirstOrDefaultAsync(_ => _.UserId == user.UserId);
+        var foundUser = await db.Users.FirstOrDefaultAsync();
 
         if (foundUser != null)
         {
-            var emailClaim = httpContext.User.FindFirst(ClaimTypes.Email);
-            if(foundUser.Email != emailClaim.Value) {
-                return Results.Unauthorized();
-            }
-
-            return Results.Ok(new { username = foundUser.Email });
+             return Results.Ok(new UserFullDetails { UserName = foundUser.UserName, IsAdmin = foundUser.IsAdmin });
         }
         else
         {
@@ -158,24 +142,25 @@ app.MapPost("/api/secure/details", async (User user, MyDbContext db, HttpContext
     {
         return Results.Problem(statusCode: 500);
     }
-}).RequireAuthorization().WithName("most secure").WithOpenApi();
+}).RequireAuthorization(options => options.RequireClaim("AdminAccess"))
+.WithName("most secure").WithOpenApi();
 
 app.MapPost("/token", async (UserManager<User> userManager, SignInManager<User> signInManager, LoginModel loginModel) =>
 {
     //Note, this is a very very simple implementation that could be hardened significantly
     var user = await userManager.FindByEmailAsync(loginModel.Email);
     var result = await signInManager.PasswordSignInAsync(loginModel.Email, loginModel.Password, isPersistent: false, lockoutOnFailure: false);
-    if (result.Succeeded)
-    {
-        var claims = new[]
-        {
-            new Claim(JwtRegisteredClaimNames.Sub, loginModel.Email),
-            new Claim(JwtRegisteredClaimNames.Email, loginModel.Email),
-        };
-    
+    if (result.Succeeded && user != null)
+    {   
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("MySuperSuperSuperSuperSuperSecretKeyValue"));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
     
+        // A Note On Claims, NEVER add sensitive information to a JWT, you can easily go to something like https://jwt.io/ and decode the token and see all the claims at any time.
+        // Make sure you hve a strong signing key as an issuer and make sure you validate claims.
+        var claims = await userManager.GetClaimsAsync(user);
+        claims.Add(new Claim(JwtRegisteredClaimNames.Sub, user.UserName)); 
+        claims.Add(new Claim(JwtRegisteredClaimNames.Email, user.Email));
+
         var token = new JwtSecurityToken(
             issuer: null,
             audience: null,

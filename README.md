@@ -4,7 +4,7 @@ Common Dotnet Security Issues and Fixes, __A Note on these projects, they are mo
 ## DockerSecurity
 <details>
 <summary>Docker Security Details</summary>
-Two identical "Hello World" APIs, each implemented with distinct Dockerfiles. The first app, **Unsecure.App**, is based on the [default .NET template](https://learn.microsoft.com/en-us/dotnet/core/docker/build-container) and presents several security and efficiency issues. The second app, **Secure.App**, features an improved Dockerfile that addresses these concerns.
+Two identical "Hello World" APIs, each implemented with distinct Dockerfiles. The first app, **Unsecure.App**, is based on the <a href="https://learn.microsoft.com/en-us/dotnet/core/docker/build-container">default .NET template</a> and presents several security and efficiency issues. The second app, **Secure.App**, features an improved Dockerfile that addresses these concerns.
 
 ### Highlights of Secure.App Dockerfile improvements
 
@@ -20,7 +20,7 @@ Two identical "Hello World" APIs, each implemented with distinct Dockerfiles. Th
 <details>
 <summary>Inject Details</summary>
 
-[CWE-89](https://cwe.mitre.org/data/definitions/89.html) SQL Injection. This project demonstrates a typical SQL injection vulnerability. Navigate to [http://localhost:YOURPORT/swagger/index.html](http://localhost:YOURPORT/swagger/index.html) to explore two endpoints: one vulnerable to SQL injection attacks and the other designed to be resistant. Use the following payload to test each endpoint and observe the differences!
+<a href="https://cwe.mitre.org/data/definitions/89.html">CWE-89</a> SQL Injection. This project demonstrates a typical SQL injection vulnerability. Navigate to <a href="http://localhost:YOURPORT/swagger/index.html">http://localhost:YOURPORT/swagger/index.html</a> to explore two endpoints: one vulnerable to SQL injection attacks and the other designed to be resistant. Use the following payload to test each endpoint and observe the differences!
 
 **Payload:**
 ```json
@@ -44,7 +44,8 @@ Two identical "Hello World" APIs, each implemented with distinct Dockerfiles. Th
 ## BOLA (Broken Object Level Authorization)
 <details>
 <summary>BOLA Details</summary>
-[BOLA](https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/)[CWE-285: Improper Authorization](https://cwe.mitre.org/data/definitions/285.html) [CWE-639: Authorization Bypass Through User-Controlled Key](https://cwe.mitre.org/data/definitions/639.html). This project demonstrates a typical BOLA vulnerability. Navigate to [http://localhost:YOURPORT/swagger/index.html](http://localhost:YOURPORT/swagger/index.html) to explore 5 endpoints: 
+<a href="https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/">BOLA</a>, <a href="https://cwe.mitre.org/data/definitions/285.html">CWE-285: Improper Authorization</a>, <a href="https://cwe.mitre.org/data/definitions/639.html">CWE-639: Authorization Bypass Through User-Controlled Key</a>. This project demonstrates a typical BOLA vulnerability; which is especially dangerous and static code analyzers frequently can't detect this issue. Navigate to <a href="http://localhost:YOURPORT/swagger/index.html">http://localhost:YOURPORT/swagger/index.html</a> to explore 5 endpoints:
+
 
 `/api/unsecure/details`
 **Payload:**
@@ -85,4 +86,45 @@ This endpoint generates a token for authentication. The identity implementation 
 }
 ```
 This endpoint requires a valid JWT token and a valid userId Guid. It critically checks the current user's email against the email of the account details being retrieved. If they do not match, a 401 Unauthorized response is returned. While this solution improves security, further enhancements could include implementing Role-Based Access Control (RBAC) and user access policies to strengthen data protection. Overall, this last approach is significantly more secure than the initial implementation.
+</details>
+
+## BOPLA (Broken Object Property Level Authorization)
+<details>
+<summary>BOLA Details</summary>
+<a href="https://owasp.org/API-Security/editions/2023/en/0xa3-broken-object-property-level-authorization/">BOPLA</a>, <a href="https://cwe.mitre.org/data/definitions/213.html">CWE-213: Exposure of Sensitive Information Due to Incompatible Policies</a>, <a href="https://cwe.mitre.org/data/definitions/915.html">CWE-915: Improperly Controlled Modification of Dynamically-Determined Object Attributes</a>. This project demonstrates a typical BOPLA vulnerability, like BOLA this issue is frequently not detected by static code analysis. Navigate to <a href="http://localhost:YOURPORT/swagger/index.html">http://localhost:YOURPORT/swagger/index.html</a> to explore 4 endpoints:
+
+`/api/unsecure/details`
+
+This endpoint returns the complete user object from the database, leading to excessive data exposure. Sensitive fields, such as "IsAdmin", may become visible to consumers. This could allow unauthorized users to attempt to elevate their privileges during user registration.
+
+`/api/details`
+
+This endpoint mitigates the data exposure issue by returning a tailored response object, which includes only the properties the API owner intends to expose—specifically, just the username.
+
+`/token`
+**Payload:**
+Doesn't have the required Claim (will fail):
+```json
+{
+  "email": "normal@normal.com",
+  "password": "Password1!"
+}
+```
+Has the required Claim:
+```json
+{
+  "email": "admin@admin.com",
+  "password": "Password2!"
+}
+```
+This endpoint generates a token for authentication. The identity implementation in this project is not production-ready but serves to demonstrate how to address the BOLA vulnerability.
+
+`/api/secure/details`
+**Payload:**
+```json
+{
+  "userId": "Some Guid From getallusers"
+}
+```
+This endpoint requires a valid JWT token with the "AdminAccess" claim. It employs policy-based authorization, ensuring that only users with the necessary claims can access it. Although this endpoint returns a dedicated response object that includes the "IsAdmin" field, it enhances security by restricting access to expected users.
 </details>

@@ -32,7 +32,7 @@ app.MapPost("/api/unsecure/login", async (UserUnsecure user, MyDbContext db) =>
             return Results.Unauthorized();
         }
     }
-    catch(Exception ex)
+    catch
     {
         return Results.Problem(statusCode: 500);
     }
@@ -60,7 +60,7 @@ app.MapPost("/api/login", async (UserUnsecure user, MyDbContext db) =>
             return Results.Unauthorized();
         }
     }
-    catch(Exception ex)
+    catch
     {
         return Results.Problem(statusCode: 500);
     }
