@@ -1,0 +1,19 @@
+services:
+  your-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+    - "5001:5142"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+    ulimits:
+      nofile:
+        soft: 1024 # File descriptor limit
+        hard: 1024
+      nproc:
+        soft: 200 # Process limit
+        hard: 200
