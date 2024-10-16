@@ -120,11 +120,5 @@ Has the required Claim:
 This endpoint generates a token for authentication. The identity implementation in this project is not production-ready but serves to demonstrate how to address the BOLA vulnerability.
 
 `/api/secure/details`
-**Payload:**
-```json
-{
-  "userId": "Some Guid From getallusers"
-}
-```
 This endpoint requires a valid JWT token with the "AdminAccess" claim. It employs policy-based authorization, ensuring that only users with the necessary claims can access it. Although this endpoint returns a dedicated response object that includes the "IsAdmin" field, it enhances security by restricting access to expected users.
 </details>
