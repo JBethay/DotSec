@@ -4,15 +4,15 @@ public class MyDbContext : DbContext
 {
     public MyDbContext(DbContextOptions<MyDbContext> options) : base(options) { }
 
-    public DbSet<UserUnsecure> UsersUnsecure { get; set; }
+    public DbSet<Userinsecure> Usersinsecure { get; set; }
 
     public DbSet<User> Users { get; set; }
 
     public static void SeedDatabase(MyDbContext db)
     {
-        if (!db.UsersUnsecure.Any())
+        if (!db.Usersinsecure.Any())
         {
-            db.UsersUnsecure.AddRange(new List<UserUnsecure>
+            db.Usersinsecure.AddRange(new List<Userinsecure>
             {
                 new() { Username = "admin", Password = "admin" },
             });

@@ -6,13 +6,13 @@ public class MyDbContext : IdentityDbContext<User>
 {
     public MyDbContext(DbContextOptions<MyDbContext> options) : base(options) { }
 
-    public DbSet<UserUnsecure> UsersUnsecure { get; set; }
+    public DbSet<Userinsecure> Usersinsecure { get; set; }
 
     public static async Task SeedDatabase(MyDbContext db, UserManager<User> userManager)
     {
-        if (!db.UsersUnsecure.Any())
+        if (!db.Usersinsecure.Any())
         {
-            db.UsersUnsecure.AddRange(new List<UserUnsecure>
+            db.Usersinsecure.AddRange(new List<Userinsecure>
             {
                 new() { Email = "normal@normal.com", Id = 1 },
                 new() { Email = "admin@admin.com", Id = 2 },
@@ -28,7 +28,7 @@ public class MyDbContext : IdentityDbContext<User>
     }
 }
 
-public class UserUnsecure
+public class Userinsecure
 {
     public int Id { get; set; } 
     public string Email { get; set; }

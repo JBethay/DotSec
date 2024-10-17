@@ -8,12 +8,12 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine@sha256:07cb8622ca6c4d7600b42b2eccba
 
 WORKDIR /src
 # Copy Only what we need
-COPY ["Secure.App.csproj", "./"]
-RUN dotnet restore "Secure.App.csproj"
+COPY ["Secure.csproj", "./"]
+RUN dotnet restore "Secure.csproj"
 COPY . .
 
 # We only need the dll, not the exe
-RUN dotnet publish "Secure.App.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "Secure.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 # Use the .NET runtime image based on Alpine for the final stage
 # Use exact SHA for Immutability, Security, and Stability
@@ -30,4 +30,4 @@ COPY --from=build /app/publish .
 EXPOSE 5141
 ENV ASPNETCORE_URLS=http://+:5141
 
-ENTRYPOINT ["dotnet", "Secure.App.dll"]
+ENTRYPOINT ["dotnet", "Secure.dll"]

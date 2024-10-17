@@ -77,11 +77,11 @@ using (var scope = app.Services.CreateScope())
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapPost("/api/unsecure/details", async (UserUnsecure user, MyDbContext db) =>
+app.MapPost("/api/insecure/details", async (Userinsecure user, MyDbContext db) =>
 {
     try
     {
-        var foundUser = await db.UsersUnsecure.FirstOrDefaultAsync(_ => _.Id == user.Id);
+        var foundUser = await db.Usersinsecure.FirstOrDefaultAsync(_ => _.Id == user.Id);
 
         if (foundUser != null)
         {
@@ -96,7 +96,7 @@ app.MapPost("/api/unsecure/details", async (UserUnsecure user, MyDbContext db) =
     {
         return Results.Problem(statusCode: 500);
     }
-}).WithName("unsecure").WithOpenApi();
+}).WithName("insecure").WithOpenApi();
 
 //Note: you should never ever have something like this in a real app, I am only adding it so you can easily get the Guids. 
 app.MapGet("/api/dangerous/getallusers", async (MyDbContext db) =>

@@ -16,12 +16,12 @@ using (var scope = app.Services.CreateScope())
     MyDbContext.SeedDatabase(db);
 }
 
-app.MapPost("/api/unsecure/login", async (UserUnsecure user, MyDbContext db) =>
+app.MapPost("/api/insecure/login", async (Userinsecure user, MyDbContext db) =>
 {
     try
     {
-        var query = $"SELECT * FROM UsersUnsecure WHERE Username = '{user.Username}' AND Password = '{user.Password}'";
-        var foundUser = await db.UsersUnsecure.FromSqlRaw(query).FirstOrDefaultAsync();
+        var query = $"SELECT * FROM Usersinsecure WHERE Username = '{user.Username}' AND Password = '{user.Password}'";
+        var foundUser = await db.Usersinsecure.FromSqlRaw(query).FirstOrDefaultAsync();
 
         if (foundUser != null)
         {
@@ -36,10 +36,10 @@ app.MapPost("/api/unsecure/login", async (UserUnsecure user, MyDbContext db) =>
     {
         return Results.Problem(statusCode: 500);
     }
-}).WithName("unsecure").WithOpenApi();
+}).WithName("insecure").WithOpenApi();
 
 
-app.MapPost("/api/login", async (UserUnsecure user, MyDbContext db) =>
+app.MapPost("/api/login", async (Userinsecure user, MyDbContext db) =>
 {
     try
     {

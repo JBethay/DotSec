@@ -1,4 +1,4 @@
-public class UserUnsecure
+public class Userinsecure
 {
     public int Id { get; set; } 
     public string Username { get; set; }

@@ -1,5 +1,5 @@
-# docker build -t unsecure_dotnet_docker_app .
-# docker run -p 5000:8080 --name unsecure_dotnet_docker_app unsecure_dotnet_docker_app
+# docker build -t insecure_dotnet_docker_app .
+# docker run -p 5000:8080 --name insecure_dotnet_docker_app insecure_dotnet_docker_app
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
 WORKDIR /App
 
@@ -14,4 +14,4 @@ RUN dotnet publish -c Release -o out
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /App
 COPY --from=build-env /App/out .
-ENTRYPOINT ["dotnet", "Unsecure.App.dll"]
+ENTRYPOINT ["dotnet", "Insecure.dll"]

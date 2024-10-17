@@ -81,7 +81,7 @@ using (var scope = app.Services.CreateScope())
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGet("/api/unsecure/details", async (MyDbContext db) =>
+app.MapGet("/api/insecure/details", async (MyDbContext db) =>
 {
     try
     {
@@ -100,7 +100,7 @@ app.MapGet("/api/unsecure/details", async (MyDbContext db) =>
     {
         return Results.Problem(statusCode: 500);
     }
-}).WithName("unsecure").WithOpenApi();
+}).WithName("insecure").WithOpenApi();
 
 app.MapGet("/api/details", async (MyDbContext db) =>
 {

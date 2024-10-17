@@ -83,7 +83,7 @@ using (var scope = app.Services.CreateScope())
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapDelete("/api/unsecure/delete", async ([FromBody]UserDetails user, MyDbContext db) =>
+app.MapDelete("/api/insecure/delete", async ([FromBody]UserDetails user, MyDbContext db) =>
 {
     try
     {
@@ -104,7 +104,7 @@ app.MapDelete("/api/unsecure/delete", async ([FromBody]UserDetails user, MyDbCon
     {
         return Results.Problem(statusCode: 500);
     }
-}).WithName("unsecure").WithOpenApi();
+}).WithName("insecure").WithOpenApi();
 
 
 app.MapDelete("/api/secure/delete", async ([FromBody]UserDetails user, MyDbContext db, HttpContext httpContext) =>
