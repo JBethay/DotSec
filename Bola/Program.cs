@@ -99,7 +99,7 @@ app.MapPost("/api/unsecure/details", async (UserUnsecure user, MyDbContext db) =
 }).WithName("unsecure").WithOpenApi();
 
 //Note: you should never ever have something like this in a real app, I am only adding it so you can easily get the Guids. 
-app.MapPost("/api/dangerous/getallusers", async (MyDbContext db) =>
+app.MapGet("/api/dangerous/getallusers", async (MyDbContext db) =>
 {
     try
     {

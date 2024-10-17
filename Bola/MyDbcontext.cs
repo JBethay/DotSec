@@ -23,8 +23,8 @@ public class MyDbContext : IdentityDbContext<User>
         }
 
         _ = await userManager.CreateAsync(new() { UserId = Guid.NewGuid(), Email = "normal@normal.com", UserName = "normal@normal.com"  }, "Password1!"); // Use a strong password policy and never hard code user creation in a real app
-        _ = await userManager.CreateAsync(new() { UserId = Guid.NewGuid(), Email = "admin@admin.com", UserName = "admin@admin.com" }, "Password2!"); // Use a strong password policy nd never hard code user creation in a real app
-        _ = await userManager.CreateAsync(new() { UserId = Guid.NewGuid(), Email = "super@admin.com", UserName = "super@admin.com"  }, "Password3!"); // Use a strong password policy and never hard code user creation in a real app
+        _ = await userManager.CreateAsync(new() { UserId = Guid.NewGuid(), Email = "admin@admin.com", UserName = "admin@admin.com" }, "Password1!"); // Use a strong password policy nd never hard code user creation in a real app
+        _ = await userManager.CreateAsync(new() { UserId = Guid.NewGuid(), Email = "super@admin.com", UserName = "super@admin.com"  }, "Password1!"); // Use a strong password policy and never hard code user creation in a real app
     }
 }
 

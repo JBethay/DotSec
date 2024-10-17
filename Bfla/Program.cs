@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -74,22 +75,25 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<MyDbContext>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     db.Database.EnsureCreated();
-    await MyDbContext.SeedDatabase(db, userManager);
+    await MyDbContext.SeedDatabase(db, userManager, roleManager);
 }
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGet("/api/unsecure/details", async (MyDbContext db) =>
+app.MapDelete("/api/unsecure/delete", async ([FromBody]UserDetails user, MyDbContext db) =>
 {
     try
     {
-        var foundUser = await db.Users.FirstOrDefaultAsync();
+        var foundUser = await db.Users.FirstOrDefaultAsync(u => u.UserName == user.UserName);
 
         if (foundUser != null)
         {
-            return Results.Ok(foundUser);
+            db.Users.Remove(foundUser);
+            await db.SaveChangesAsync();
+            return Results.Ok($"Deleted {user.UserName}");
         }
         else
         {
@@ -102,15 +106,18 @@ app.MapGet("/api/unsecure/details", async (MyDbContext db) =>
     }
 }).WithName("unsecure").WithOpenApi();
 
-app.MapGet("/api/details", async (MyDbContext db) =>
+
+app.MapDelete("/api/secure/delete", async ([FromBody]UserDetails user, MyDbContext db, HttpContext httpContext) =>
 {
     try
     {
-        var foundUser = await db.Users.FirstOrDefaultAsync();
+        var foundUser = await db.Users.FirstOrDefaultAsync(u => u.UserName == user.UserName);
 
         if (foundUser != null)
         {
-            return Results.Ok(new UserDetails { UserName = foundUser.UserName });
+            db.Users.Remove(foundUser);
+            await db.SaveChangesAsync();
+            return Results.Ok($"Deleted {user.UserName}");
         }
         else
         {
@@ -121,53 +128,8 @@ app.MapGet("/api/details", async (MyDbContext db) =>
     {
         return Results.Problem(statusCode: 500);
     }
-}).WithName("more secure").WithOpenApi();
-
-app.MapGet("/api/secure/details", async (MyDbContext db, HttpContext httpContext) =>
-{
-    try
-    {
-        var foundUser = await db.Users.FirstOrDefaultAsync();
-
-        if (foundUser != null)
-        {
-             return Results.Ok(new UserFullDetails { UserName = foundUser.UserName, IsAdmin = foundUser.IsAdmin });
-        }
-        else
-        {
-            return Results.BadRequest();
-        }
-    }
-    catch
-    {
-        return Results.Problem(statusCode: 500);
-    }
-}).RequireAuthorization(options => options.RequireClaim("AdminAccess"))
-.WithName("most secure").WithOpenApi();
-
-app.MapPost("/api/update", async (User user, MyDbContext db) =>
-{
-    try
-    {
-        var foundUser = await db.Users.FindAsync(user.Id);
-        
-        if (foundUser == null)
-        {
-            return Results.NotFound();
-        }
-
-        foundUser.UserName = user.UserName;
-        foundUser.IsAdmin = user.IsAdmin;
-
-        await db.SaveChangesAsync();
-
-        return Results.Ok();
-    }
-    catch
-    {
-        return Results.Problem(statusCode: 500);
-    }
-}).WithName("update").WithOpenApi();
+}).RequireAuthorization(options => options.RequireRole("Admin"))
+.WithName("secure").WithOpenApi();
 
 app.MapPost("/token", async (UserManager<User> userManager, SignInManager<User> signInManager, LoginModel loginModel) =>
 {
@@ -184,6 +146,12 @@ app.MapPost("/token", async (UserManager<User> userManager, SignInManager<User> 
         var claims = await userManager.GetClaimsAsync(user);
         claims.Add(new Claim(JwtRegisteredClaimNames.Sub, user.UserName)); 
         claims.Add(new Claim(JwtRegisteredClaimNames.Email, user.Email));
+        
+        var roles = await userManager.GetRolesAsync(user);
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
 
         var token = new JwtSecurityToken(
             issuer: null,

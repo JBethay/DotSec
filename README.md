@@ -44,8 +44,7 @@ Two identical "Hello World" APIs, each implemented with distinct Dockerfiles. Th
 ## BOLA (Broken Object Level Authorization)
 <details>
 <summary>BOLA Details</summary>
-<a href="https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/">BOLA</a>, <a href="https://cwe.mitre.org/data/definitions/285.html">CWE-285: Improper Authorization</a>, <a href="https://cwe.mitre.org/data/definitions/639.html">CWE-639: Authorization Bypass Through User-Controlled Key</a>. This project demonstrates a typical BOLA vulnerability; which is especially dangerous and static code analyzers frequently can't detect this issue. Navigate to <a href="http://localhost:YOURPORT/swagger/index.html">http://localhost:YOURPORT/swagger/index.html</a> to explore 5 endpoints:
-
+This project demonstrates a typical <a href="https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/">BOLA</a> vulnerability, which poses a significant security risk as it allows consumers to access not only their own resources but also those of others they were not intended to access. Static code analyzers often struggle to detect this issue. The project highlights related vulnerabilities such as <a href="https://cwe.mitre.org/data/definitions/285.html">CWE-285: Improper Authorization</a> and <a href="https://cwe.mitre.org/data/definitions/639.html">CWE-639: Authorization Bypass Through User-Controlled Key</a>. To explore five endpoints, navigate to <a href="http://localhost:YOURPORT/swagger/index.html">http://localhost:YOURPORT/swagger/index.html</a>.
 
 `/api/unsecure/details`
 **Payload:**
@@ -91,7 +90,7 @@ This endpoint requires a valid JWT token and a valid userId Guid. It critically 
 ## BOPLA (Broken Object Property Level Authorization)
 <details>
 <summary>BOPLA Details</summary>
-<a href="https://owasp.org/API-Security/editions/2023/en/0xa3-broken-object-property-level-authorization/">BOPLA</a>, <a href="https://cwe.mitre.org/data/definitions/213.html">CWE-213: Exposure of Sensitive Information Due to Incompatible Policies</a>, <a href="https://cwe.mitre.org/data/definitions/915.html">CWE-915: Improperly Controlled Modification of Dynamically-Determined Object Attributes</a>. This project demonstrates a typical BOPLA vulnerability, like BOLA this issue is frequently not detected by static code analysis. Navigate to <a href="http://localhost:YOURPORT/swagger/index.html">http://localhost:YOURPORT/swagger/index.html</a> to explore 4 endpoints:
+This project demonstrates a typical <a href="https://owasp.org/API-Security/editions/2023/en/0xa3-broken-object-property-level-authorization/">BOPLA</a> vulnerability, where the API exposes excessive information and allows updates to unintended data; which allows for privilege escalation in a system. Like BOLA, this issue is often undetectable by static code analysis tools. The project highlights related vulnerabilities such as <a href="https://cwe.mitre.org/data/definitions/213.html">CWE-213: Exposure of Sensitive Information Due to Incompatible Policies</a> and <a href="https://cwe.mitre.org/data/definitions/915.html">CWE-915: Improperly Controlled Modification of Dynamically-Determined Object Attributes</a>. To explore five endpoints, navigate to <a href="http://localhost:YOURPORT/swagger/index.html">http://localhost:YOURPORT/swagger/index.html</a>.
 
 `/api/unsecure/details`
 
@@ -114,13 +113,23 @@ Has the required Claim:
 ```json
 {
   "email": "admin@admin.com",
-  "password": "Password2!"
+  "password": "Password1!"
 }
 ```
-This endpoint generates a token for authentication. The identity implementation in this project is not production-ready but serves to demonstrate how to address the BOLA vulnerability.
+This endpoint generates a token for authentication. The identity implementation in this project is not production-ready but serves to demonstrate how to address the BOPLA vulnerability.
 
 `/api/secure/details`
 This endpoint requires a valid JWT token with the "AdminAccess" claim. It employs policy-based authorization, ensuring that only users with the necessary claims can access it. Although this endpoint returns a dedicated response object that includes the "IsAdmin" field, it enhances security by restricting access to expected users.
+
+`/api/update`
+**Payload:**
+```json
+{
+  "username": "Some username",
+  "isAdmin": "A IsAdminFlag"
+}
+```
+This endpoint allows for users to update their object. Note that this is an unauthorized endpoint and something we will touch on in the bfla (Broken Function level Authorization) project.
 </details>
 
 ## Unrestricted Resource Consumption
@@ -134,4 +143,46 @@ This endpoint requires a valid JWT token with the "AdminAccess" claim. It employ
 - **Cancellation Tokens:** The endpoint now accepts a `CancellationToken`, allowing clients to cancel requests. This token can also be used to abort downstream tasks, helping to prevent long-running processes from continuing after a client disconnects.
 - **Request Timeout middleware:** New Request Timeout policies have been added to the endpoint, which automatically cancel any request exceeding a specified timeout threshold. This helps manage long-running requests that could exceed expected durations.
 - **Container Resource Limits:** I created a K8s `pod.yml` and `docker-compose.yml` files that impose limits on container resources (CPU, memory, etc.). This approach helps prevent node resource exhaustion in a microservice environment where auto-scaling is implemented.
+</details>
+
+## BFLA (Broken Function Level Authorization)
+<details>
+<summary>BFLA Details</summary>
+This project demonstrates a typical <a href="https://owasp.org/API-Security/editions/2023/en/0xa5-broken-function-level-authorization//">BFLA</a> vulnerability, where the API does not secure functions and endpoints that allow a user to execute a flow despite not having the expected privilege. Like BOLA and BOPLA, this issue is often undetectable by static code analysis tools. The project highlights related vulnerabilities such as <a href="https://cwe.mitre.org/data/definitions/285.html">CWE-285: Improper Authorization</a>. To explore three endpoints, navigate to <a href="http://localhost:YOURPORT/swagger/index.html">http://localhost:YOURPORT/swagger/index.html</a>.
+
+`/api/unsecure/delete`
+**Payload:**
+```json
+{
+  "username": "basic@basic.com",
+}
+```
+This unsecure endpoint allows the deletion of any user, making it highly dangerous.
+
+`/api/secure/delete`
+**Payload:**
+```json
+{
+  "username": "normal@normal.com",
+}
+```
+This endpoint mitigates the risks of the first by requiring the user to authenticate with a JWT and ensuring the user is in the "Admin" role to access it. Although it performs the same function as the unsecure endpoint, it is safer as it restricts access to authenticated and authorized users. It employs Role-Based Access Control (RBAC), ensuring that only users with the necessary claims can access it. Additionally, this endpoint returns a dedicated response object that includes the "IsAdmin" field, further enhancing security by confirming user roles.
+
+`/token`
+**Payload:**
+Doesn't have the required role, will fail on the secure endpoint:
+```json
+{
+  "email": "normal@normal.com",
+  "password": "Password1!"
+}
+```
+Has the required role for the secure endpoint:
+```json
+{
+  "email": "admin@admin.com",
+  "password": "Password1!"
+}
+```
+This endpoint generates a token for authentication. Note that the identity implementation in this project is not production-ready but serves to demonstrate how to address the BFLA vulnerability.
 </details>
