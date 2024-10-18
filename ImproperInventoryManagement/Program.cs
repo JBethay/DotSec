@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -9,13 +10,28 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//A better way to handle api versioning
+builder.Services.AddApiVersioning(options => {
+    options.DefaultApiVersion = new(2);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = false; //Don't report versions
+    options.UnsupportedApiVersionStatusCode = 400;
+    options.ApiVersionReader = ApiVersionReader.Combine(
+        new HeaderApiVersionReader("api-x-version"),
+        new QueryStringApiVersionReader("api-version")
+    );
+}).AddApiExplorer(config => {
+    config.GroupNameFormat = "'v'V";
+    config.SubstituteApiVersionInUrl = true;
+});
+
 builder.Services.AddDbContext<MyDbContext>(options =>
     options.UseInMemoryDatabase("MyInMemoryDb"));
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "BOPLA API", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "IIM API", Version = "v1" });
     var securityScheme = new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -70,6 +86,12 @@ builder.Services.AddAuthorization(options => {
 
 var app = builder.Build();
 
+//Better way to handle api versions
+var apiVersionSet = app.NewApiVersionSet()
+    .HasApiVersion(new(2))
+    .HasDeprecatedApiVersion(new(1))
+    .Build();
+
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<MyDbContext>();
@@ -81,93 +103,49 @@ using (var scope = app.Services.CreateScope())
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGet("/api/insecure/details", async (MyDbContext db) =>
+app.MapGet("/api/v1/details", async (MyDbContext db) =>
 {
     try
     {
-        var foundUser = await db.Users.FirstOrDefaultAsync();
-
-        if (foundUser != null)
-        {
-            return Results.Ok(foundUser);
-        }
-        else
-        {
-            return Results.BadRequest();
-        }
+        var users = await db.Users.Select(u => new UserFullDetails { UserName = u.UserName, IsAdmin = u.IsAdmin }).ToListAsync();
+        return Results.Ok(users);
     }
     catch
     {
         return Results.Problem(statusCode: 500);
     }
-}).WithName("insecure").WithOpenApi();
+}).WithName("v1").WithOpenApi();
 
-app.MapGet("/api/details", async (MyDbContext db) =>
+app.MapGet("/api/v2/details", async (MyDbContext db, HttpContext httpContext) =>
 {
     try
     {
-        var foundUser = await db.Users.FirstOrDefaultAsync();
-
-        if (foundUser != null)
-        {
-            return Results.Ok(new UserDetails { UserName = foundUser.UserName });
-        }
-        else
-        {
-            return Results.BadRequest();
-        }
-    }
-    catch
-    {
-        return Results.Problem(statusCode: 500);
-    }
-}).WithName("more secure").WithOpenApi();
-
-app.MapGet("/api/secure/details", async (MyDbContext db, HttpContext httpContext) =>
-{
-    try
-    {
-        var foundUser = await db.Users.FirstOrDefaultAsync();
-
-        if (foundUser != null)
-        {
-             return Results.Ok(new UserFullDetails { UserName = foundUser.UserName, IsAdmin = foundUser.IsAdmin });
-        }
-        else
-        {
-            return Results.BadRequest();
-        }
+        var users = await db.Users.Select(u => new UserFullDetails { UserName = u.UserName, IsAdmin = u.IsAdmin }).ToListAsync();
+        return Results.Ok(users);
     }
     catch
     {
         return Results.Problem(statusCode: 500);
     }
 }).RequireAuthorization(options => options.RequireClaim("AdminAccess"))
-.WithName("most secure").WithOpenApi();
+.WithName("v2").WithOpenApi();
 
-app.MapPost("/api/update", async (User user, MyDbContext db) =>
+//Use This Instead
+app.MapGet("/api/details", () => Results.StatusCode(406)).WithApiVersionSet(apiVersionSet).MapToApiVersion(1);
+
+app.MapGet("/api/details", async (MyDbContext db, HttpContext httpContext) =>
 {
     try
     {
-        var foundUser = await db.Users.FindAsync(user.Id);
-        
-        if (foundUser == null)
-        {
-            return Results.NotFound();
-        }
-
-        foundUser.UserName = user.UserName;
-        foundUser.IsAdmin = user.IsAdmin;
-
-        await db.SaveChangesAsync();
-
-        return Results.Ok();
+        var users = await db.Users.Select(u => new UserFullDetails { UserName = u.UserName, IsAdmin = u.IsAdmin }).ToListAsync();
+        return Results.Ok(users);
     }
     catch
     {
         return Results.Problem(statusCode: 500);
     }
-}).WithName("update").WithOpenApi();
+}).RequireAuthorization(options => options.RequireClaim("AdminAccess"))
+.WithApiVersionSet(apiVersionSet).MapToApiVersion(2);
 
 app.MapPost("/token", async (UserManager<User> userManager, SignInManager<User> signInManager, LoginModel loginModel) =>
 {

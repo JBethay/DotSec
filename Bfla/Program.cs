@@ -16,7 +16,7 @@ builder.Services.AddDbContext<MyDbContext>(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "BOLA API", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "BFLA API", Version = "v1" });
     var securityScheme = new OpenApiSecurityScheme
     {
         Name = "Authorization",

@@ -207,3 +207,37 @@ This insecure endpoint makes a request to any URI provided by the client and ret
 ```uri=https://www.google.com:443```
 This secured endpoint makes a request to any URI provided by the client but first: (1) converts the string URI into a safe URI type in C#, performing sanitization checks; (2) compares the scheme, host, and port against allowed lists to validate the request; (3) makes the request using a custom secure HttpClient with automatic redirects disabled; and (4) returns an OK 200 response if successful.
 </details>
+
+## Improper Inventory Management
+<details>
+<summary>Improper Inventory Management Details</summary>
+This project demonstrates a typical <a href="https://owasp.org/API-Security/editions/2023/en/0xa9-improper-inventory-management/">Improper Inventory Management</a> vulnerability, where the API does not properly deprecate or protect functions and endpoints; allowing a consumers to access resources from old or beta endpoints when they might not be protected. Like many other vulnerabilities on this list, this issue is often undetectable by static code analysis tools. The project highlights related vulnerabilities such as <a href="https://cwe.mitre.org/data/definitions/1059.html">CWE-1059: Insufficient Technical Documentation</a>. To explore four endpoints, navigate to <a href="http://localhost:YOURPORT/swagger/index.html">http://localhost:YOURPORT/swagger/index.html</a>.
+
+`/api/v1/details/`
+This insecure endpoint permits the retrieval of user details. Although it should have been deprecated and removed, it remains active, similar to many legacy endpoints. Its continued availability poses a significant security risk.
+
+`/api/v2/details/`
+This secure endpoint functions similarly to the `v1` endpoint but now requires a token from the user with the `username admin@admin.com and password Password1!`, due to the enforced authorization policy. Despite these security improvements, the presence of `v2` in the path may inadvertently inform attackers of a potential `v1`, `beta`, `development`, or `admin` endpoint that might be less secure and could be targeted for exploitation.
+
+`/api/details/`
+**Payload:** `header: api-x-version=2` or `query: ?api-version=2`
+This secure endpoint requires a token from the user with the `username admin@admin.com and password Password1!`. Unlike the previous endpoints, it does not include the version in the route; instead, versioning is handled via headers or query strings. This approach is supported by middleware that manages API versioning and accommodates deprecated endpoints. Attempts to access a deprecated endpoint will result in a `406 Not Acceptable` status code, while requests for non-existent API versions will yield a `400 Bad Request response.` By centralizing API versioning, developers are encouraged to remove outdated versions and deprecate endpoints more effectively. The critical difference here though is `v1` of this API was retired specifically to mitigate potential abuse.
+
+`/token`
+**Payload:**
+Doesn't have the required claim, will fail on the secure endpoints:
+```json
+{
+  "email": "normal@normal.com",
+  "password": "Password1!"
+}
+```
+Has the required claim for the secure endpoints:
+```json
+{
+  "email": "admin@admin.com",
+  "password": "Password1!"
+}
+```
+This endpoint generates a token for authentication. Note that the identity implementation in this project is not production-ready but serves to demonstrate how to address the vulnerability.
+</details>
