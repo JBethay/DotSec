@@ -4,7 +4,7 @@ Common Dotnet Security Issues and Fixes, __A Note on these projects, they are mo
 ## DockerSecurity
 <details>
 <summary>Docker Security Details</summary>
-Two identical "Hello World" APIs, each implemented with distinct Dockerfiles. The first app, **Insecure**, is based on the <a href="https://learn.microsoft.com/en-us/dotnet/core/docker/build-container">default .NET template</a> and presents several security and efficiency issues; specifically <a href="https://cwe.mitre.org/data/definitions/250.html">CWE-250: Execution with Unnecessary Privileges</a>. The second app, **Secure**, features an improved Dockerfile that addresses these concerns.
+Two identical "Hello World" APIs, each implemented with distinct Dockerfiles. The first app, Insecure, is based on the <a href="https://learn.microsoft.com/en-us/dotnet/core/docker/build-container">default .NET template</a> and presents several security and efficiency issues; specifically <a href="https://cwe.mitre.org/data/definitions/250.html">CWE-250: Execution with Unnecessary Privileges</a>. The second app, Secure, features an improved Dockerfile that addresses these concerns.
 
 ### Highlights of Secure Dockerfile improvements
 
@@ -47,6 +47,7 @@ Two identical "Hello World" APIs, each implemented with distinct Dockerfiles. Th
 <summary>BOLA Details</summary>
 This project demonstrates a typical <a href="https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/">BOLA</a> vulnerability, which poses a significant security risk as it allows consumers to access not only their own resources but also those of others they were not intended to access. Static code analyzers often struggle to detect this issue. The project highlights related vulnerabilities such as <a href="https://cwe.mitre.org/data/definitions/285.html">CWE-285: Improper Authorization</a> and <a href="https://cwe.mitre.org/data/definitions/639.html">CWE-639: Authorization Bypass Through User-Controlled Key</a>. To explore five endpoints, navigate to <a href="http://localhost:YOURPORT/swagger/index.html">http://localhost:YOURPORT/swagger/index.html</a>.
 
+<br>
 <br>
 
 `/api/insecure/details`
@@ -95,6 +96,7 @@ This endpoint requires a valid JWT token and a valid userId Guid. It critically 
 <summary>BOPLA Details</summary>
 This project demonstrates a typical <a href="https://owasp.org/API-Security/editions/2023/en/0xa3-broken-object-property-level-authorization/">BOPLA</a> vulnerability, where the API exposes excessive information and allows updates to unintended data; which allows for privilege escalation in a system. Like BOLA, this issue is often undetectable by static code analysis tools. The project highlights related vulnerabilities such as <a href="https://cwe.mitre.org/data/definitions/213.html">CWE-213: Exposure of Sensitive Information Due to Incompatible Policies</a> and <a href="https://cwe.mitre.org/data/definitions/915.html">CWE-915: Improperly Controlled Modification of Dynamically-Determined Object Attributes</a>. To explore five endpoints, navigate to <a href="http://localhost:YOURPORT/swagger/index.html">http://localhost:YOURPORT/swagger/index.html</a>.
 
+<br>
 <br>
 
 `/api/insecure/details`
@@ -156,6 +158,7 @@ This endpoint allows for users to update their object. Note that this is an unau
 This project demonstrates a typical <a href="https://owasp.org/API-Security/editions/2023/en/0xa5-broken-function-level-authorization/">BFLA</a> vulnerability, where the API does not secure functions and endpoints that allow a user to execute a flow despite not having the expected privilege. Like BOLA and BOPLA, this issue is often undetectable by static code analysis tools. The project highlights related vulnerabilities such as <a href="https://cwe.mitre.org/data/definitions/285.html">CWE-285: Improper Authorization</a>. To explore three endpoints, navigate to <a href="http://localhost:YOURPORT/swagger/index.html">http://localhost:YOURPORT/swagger/index.html</a>.
 
 <br>
+<br>
 
 `/api/insecure/delete`
 **Payload:**
@@ -200,6 +203,7 @@ This endpoint generates a token for authentication. Note that the identity imple
 This project demonstrates a typical <a href="https://owasp.org/Top10/A10_2021-Server-Side_Request_Forgery_%28SSRF%29/">SSRF</a> vulnerability, where the API fails to validate a client-provided URL before making a request. Such oversight can lead to serious consequences, including exposure of sensitive data, DDoS attacks, privilege escalation, and various other exploitations. Even if the client is developed in-house, it should not be trusted on the server side. The project illustrates both In-Band SSRF, where the results of calls are returned directly to the caller, and Out-Of-Band or Blind SSRF, where results are not directly returned. Although the latter is somewhat better than the former, a skilled attacker could still compromise your system quickly. The project highlights vulnerabilities like <a href="https://cwe.mitre.org/data/definitions/918.html">CWE-918: Server-Side Request Forgery (SSRF)</a>. To explore three endpoints, navigate to <a href="http://localhost:YOURPORT/swagger/index.html">http://localhost:YOURPORT/swagger/index.html</a>.
 
 <br>
+<br>
 
 `/api/inband`
 **Payload:**
@@ -222,6 +226,7 @@ This secured endpoint makes a request to any URI provided by the client but firs
 <summary>Improper Inventory Management Details</summary>
 This project demonstrates a typical <a href="https://owasp.org/API-Security/editions/2023/en/0xa9-improper-inventory-management/">Improper Inventory Management</a> vulnerability, where the API does not properly deprecate or protect functions and endpoints; allowing a consumers to access resources from old or beta endpoints when they might not be protected. Like many other vulnerabilities on this list, this issue is often undetectable by static code analysis tools. The project highlights related vulnerabilities such as <a href="https://cwe.mitre.org/data/definitions/1059.html">CWE-1059: Insufficient Technical Documentation</a>. To explore four endpoints, navigate to <a href="http://localhost:YOURPORT/swagger/index.html">http://localhost:YOURPORT/swagger/index.html</a>.
 
+<br>
 <br>
 
 `/api/v1/details/`
@@ -259,6 +264,7 @@ This endpoint generates a token for authentication. Note that the identity imple
 This project demonstrates a typical <a href="https://owasp.org/Top10/A05_2021-Security_Misconfiguration/">Security Misconfiguration</a> vulnerability, where the API does has a lack of input sanitization. The API fails to check file types, sizes, or anti forgery tokens before uploads. Security Misconfiguration is a pretty broad vulnerability category and lots of things could fit here, but I wanted to build out a vulnerability that I've seen developers make <a href="https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload">Unrestricted File Uploads</a>. Like many other vulnerabilities on this list, this issue can be undetectable by static code analysis tools. The project highlights related vulnerabilities such as <a href="https://cwe.mitre.org/data/definitions/352.html">CWE-352: Cross-Site Request Forgery (CSRF)</a>, <a href="https://cwe.mitre.org/data/definitions/434.html">CWE-434: Unrestricted Upload of File with Dangerous Type</a>, <a href="https://cwe.mitre.org/data/definitions/646.html">CWE-646: Reliance on File Name or Extension of Externally-Supplied File</a>. To explore three endpoints, navigate to <a href="http://localhost:YOURPORT/swagger/index.html">http://localhost:YOURPORT/swagger/index.html</a>.
 
 <br>
+<br>
 
 This application disables the read-only file system of the container, which is considered a bad practice, and allows users to upload files, returning the contents directly upon successful requests. This simulates a scenario where a user uploads a file for processing. However, the approach of returning file contents through a shell script poses significant security risks. In a production environment, files should ideally be uploaded to secure storage solutions, such as Amazon S3 Bucket or an Azure Storage Account, and scanned for malicious content before processing. Furthermore, the API should only accept uploads from authenticated and authorized users to enhance security.
 
@@ -268,6 +274,7 @@ This application disables the read-only file system of the container, which is c
 This endpoint accepts files of any type and size, which poses significant security risks. Such an open policy can lead to various vulnerabilities, including Distributed Denial of Service (DDoS) attacks, Cross-Site Request Forgery (CSRF), and privilege escalation attempts, among others. 
 
 `/upload/safe`
+**Payload:**
 `.txt files less than 1MB in size, must provide the AntiForgery Token`
 This endpoint requires an anti-forgery token in the header to help mitigate CSRF/XSRF attacks. It verifies the file extension and size to ensure they meet acceptable criteria. Additionally, the endpoint saves the uploaded file without its extension. This step is crucial, especially if the API were to accept various file extensions, as it helps prevent potential security risks associated with executing harmful file types.
 
