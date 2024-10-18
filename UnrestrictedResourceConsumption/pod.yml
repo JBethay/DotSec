@@ -6,6 +6,8 @@ spec:
   containers:
   - name: app
     image: restricted_dotnet_docker_app
+    securityContext:
+      readOnlyRootFilesystem: true
     resources:
       requests:
         memory: "64Mi"

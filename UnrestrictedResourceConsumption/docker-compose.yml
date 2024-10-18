@@ -3,6 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    read_only: true
     ports:
     - "5001:5142"
     deploy:

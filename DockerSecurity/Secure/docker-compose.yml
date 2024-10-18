@@ -1,0 +1,21 @@
+services:
+  your-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    read_only: true
+    ports:
+    - "5001:5141"
+    #Will talk about resource limites in the Unrestricted Resource Consumption project 
+    #deploy:
+    #  resources:
+    #    limits:
+    #      cpus: '1.0'
+    #      memory: 512M
+    #ulimits:
+    #  nofile:
+    #    soft: 1024 # File descriptor limit
+    #    hard: 1024
+    #  nproc:
+    #    soft: 200 # Process limit
+    #    hard: 200
