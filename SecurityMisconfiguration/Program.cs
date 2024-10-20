@@ -15,7 +15,7 @@ builder.Services.AddSwaggerGen(c =>
 var app = builder.Build();
 app.UseAntiforgery();
 
-//NEVER DO THIS, IF YOU DO YOU ARE ASKING FOR PROBLEMS. This is here to show what could happen if a user opens the file uploaded to storage.
+//NEVER DO THIS, IF YOU DO YOU ARE ASKING FOR PROBLEMS with https://cwe.mitre.org/data/definitions/78.html. This is here to show what could happen if a user opens the file uploaded to storage.
 static async Task<string> HyperDangerousShellExecution(string filePath)
 {
     var processInfo = new ProcessStartInfo
