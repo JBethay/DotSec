@@ -1,5 +1,5 @@
 # DotSec
-Common Dotnet Security Issues and Fixes, __A Note on these projects, they are mostly minimal api's designed to showcase security issues and fixes. They are not designed to be taken as architectural guides for how to structure production applications or as guidelines for how to [configure auth](https://cwe.mitre.org/data/definitions/547.html) for an application. Also note that much of this project exposes [OpenAPI Swagger pages](https://cwe.mitre.org/data/definitions/200.html) for demo and can return [detailed error pages](https://cwe.mitre.org/data/definitions/756.html), this is not something you should do in production. Some helpful links are the [OWSAP docker security cheat sheet](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html) and the [OWSAP dotnet security cheatsheet](https://cheatsheetseries.owasp.org/cheatsheets/DotNet_Security_Cheat_Sheet.html). To run these projects either run the relevant docker commands or run `dotnet run` in the project dir.__
+Common Dotnet Security Issues and Fixes, __A Note on these projects, they are mostly minimal api's designed to showcase security issues and fixes. They are not designed to be taken as architectural guides for how to structure production applications or as guidelines for how to [configure auth](https://cwe.mitre.org/data/definitions/547.html) for an application. Also note that much of this project exposes [OpenAPI Swagger pages](https://cwe.mitre.org/data/definitions/200.html) for demo and can return [detailed error pages](https://cwe.mitre.org/data/definitions/756.html), this is not something that should be done in production. Some helpful links are the [OWSAP docker security cheat sheet](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html) and the [OWSAP dotnet security cheatsheet](https://cheatsheetseries.owasp.org/cheatsheets/DotNet_Security_Cheat_Sheet.html). To run these projects either run the relevant docker commands or run `dotnet run` in the project dir.__
 
 ### Build/Run Examples
 <details>
@@ -20,9 +20,12 @@ Two identical "Hello World" APIs, each implemented with distinct Dockerfiles. Th
 - **Specific SHA Tags:** Implements exact SHA image tags to enhance immutability, security, and stability against potential vulnerabilities.
 - **Selective File Copying:** Only copies and builds the necessary files, reducing the overall image size and attack surface.
 - **Minimal Publishing:** Publishes only the required files (DLLs), excluding unnecessary executables.
-- **Non-Root User:** **Critically** creates and assigns a dedicated non-root user and group, running the container under this user to improve security.
+- **Non-Root User:** Critically creates and assigns a dedicated non-root user and group, running the container under this user to improve security.
 - **Defined Port Exposure:** Explicitly exposes the specified application ports, following best practices for container configuration.
-- **Docker Compose File For ReadOnly file system:** That sets the file system to read-only, run `docker-compose build` && `docker-compose up`
+- **Docker Compose File For ReadOnly file system:** Sets the file system to read-only.
+
+run `docker-compose build` && `docker-compose up` to see it in action:
+
 <img src="./ScreenShots/docker-security-build.png">
 <img src="./ScreenShots/docker-security-run.png">
 </details>
@@ -51,7 +54,7 @@ Two identical "Hello World" APIs, each implemented with distinct Dockerfiles. Th
   - When raw SQL execution is necessary and an ORM isn't available, always use parameterized queries to prevent injection. For Entity Framework Core, this can be achieved using `FromSqlRaw` with parameters or by utilizing `FromSql`, which automatically handles parameterization.
 
 - **Hashing Passwords and Salting:** 
-  - Rule #1 of Authentication & Authorization (AuthN & AuthZ) is to never implement your own authentication. If you need to store passwords and don’t have access to a robust framework like [Microsoft Identity](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/identity?view=aspnetcore-8.0), ensure you store only the hash of the password along with a random salt value. This practice helps protect against dictionary attacks by preventing attackers from easily guessing passwords or common hashes. __Also make sure you have a strong password policy when you allow users to self service accounts.__ Note that while this demo's SQL injection attacks, NoSQL Injection attacks are also extremely common and implemented (and fixed) in a similar manor.
+  - Rule #1 of Authentication & Authorization (AuthN & AuthZ) is to never implement your own authentication. If you need to store passwords and don’t have access to a robust framework like [Microsoft Identity](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/identity?view=aspnetcore-8.0), ensure you store only the hash of the password along with a random salt value. This practice helps protect against dictionary attacks by preventing attackers from easily guessing passwords or common hashes. __Also make sure you have a strong password policy when you allow users to self service accounts.__ Note that while this demo's a SQL injection attack, NoSQL Injection attacks are also extremely common and implemented (and fixed) in a similar manner.
 
 <img src="./ScreenShots/injection-secure.png">
 </details>
@@ -176,14 +179,14 @@ This endpoint allows for users to update their object. Note that this is an unau
 ## Unrestricted Resource Consumption
 <details>
 <summary>Unrestricted Resource Consumption</summary>
-<a href="https://owasp.org/API-Security/editions/2023/en/0xa4-unrestricted-resource-consumption//">Unrestricted Resource Consumption</a>, <a href="https://cwe.mitre.org/data/definitions/770.html">CWE-770: Allocation of Resources Without Limits or Throttling</a>, <a href="https://cwe.mitre.org/data/definitions/400.html">CWE-400: Uncontrolled Resource Consumption</a>, <a href="https://cwe.mitre.org/data/definitions/799.html">CWE-799: Improper Control of Interaction Frequency</a>, <a href="https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-204.pdf">"Rate Limiting (Throttling)" - Security Strategies for Microservices-based Application Systems, NIST</a>, and <a href="https://owasp.org/API-Security/editions/2023/en/0xa6-unrestricted-access-to-sensitive-business-flows/">Unrestricted Access to Sensitive Business Flows</a>. This project demonstrates various fixes to help mitigate unrestricted resource consumption and unrestricted access to sensitive business flows, an issues often overlooked by static code analysis. To run the application, execute `docker-compose build && docker-compose up`, then navigate to <a href="http://localhost:5001/">http://localhost:5001/</a>.
+<a href="https://owasp.org/API-Security/editions/2023/en/0xa4-unrestricted-resource-consumption//">Unrestricted Resource Consumption</a>, <a href="https://cwe.mitre.org/data/definitions/770.html">CWE-770: Allocation of Resources Without Limits or Throttling</a>, <a href="https://cwe.mitre.org/data/definitions/400.html">CWE-400: Uncontrolled Resource Consumption</a>, <a href="https://cwe.mitre.org/data/definitions/799.html">CWE-799: Improper Control of Interaction Frequency</a>, <a href="https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-204.pdf">"Rate Limiting (Throttling)" - Security Strategies for Microservices-based Application Systems, NIST</a>, and <a href="https://owasp.org/API-Security/editions/2023/en/0xa6-unrestricted-access-to-sensitive-business-flows/">Unrestricted Access to Sensitive Business Flows</a>. This project demonstrates various fixes to help mitigate unrestricted resource consumption and unrestricted access to sensitive business flows and issues often overlooked by static code analysis. To run the application, execute `docker-compose build && docker-compose up`, then navigate to <a href="http://localhost:5001/">http://localhost:5001/</a>.
 
 ### Highlights improvements to mitigate the issue
 
 - **Rate Limiting:** The application implements `sliding window` rate limiting middleware for the endpoint. While effective for single instances, a distributed system may require a more comprehensive distributed rate limiter service, presenting an interesting system design challenge (and one of my personal favorite interview questions.) This solution in particular can help alleviate pressure from Unrestricted Access to Sensitive Business Flows when combined with some form of IP filtering/bot protection.
 - **Cancellation Tokens:** The endpoint now accepts a `CancellationToken`, allowing clients to cancel requests. This token can also be used to abort downstream tasks, helping to prevent long-running processes from continuing after a client disconnects.
 - **Request Timeout middleware:** New Request Timeout policies have been added to the endpoint, which automatically cancel any request exceeding a specified timeout threshold. This helps manage long-running requests that could exceed expected durations.
-- **Container Resource Limits:** I created a K8s `pod.yml` and `docker-compose.yml` files that impose limits on container resources (CPU, memory, etc.). This approach helps prevent node resource exhaustion in a microservice environment where auto-scaling is implemented.
+- **Container Resource Limits:** I created a K8s `pod.yml` and a `docker-compose.yml` file that impose limits on container resources (CPU, memory, etc.). This approach helps prevent node resource exhaustion in a microservice environment where auto-scaling is implemented.
 <img src="./ScreenShots/urc-build.png">
 <img src="./ScreenShots/urc-run.png">
 </details>
@@ -191,7 +194,7 @@ This endpoint allows for users to update their object. Note that this is an unau
 ## BFLA (Broken Function Level Authorization)
 <details>
 <summary>BFLA Details</summary>
-This project demonstrates a typical <a href="https://owasp.org/API-Security/editions/2023/en/0xa5-broken-function-level-authorization/">BFLA</a> vulnerability, where the API does not secure functions and endpoints that allow a user to execute a flow despite not having the expected privilege. Like BOLA and BOPLA, this issue is often undetectable by static code analysis tools. The project highlights related vulnerabilities such as <a href="https://cwe.mitre.org/data/definitions/285.html">CWE-285: Improper Authorization</a>. To explore three endpoints, navigate to <a href="http://localhost:YOURPORT/swagger/index.html">http://localhost:YOURPORT/swagger/index.html</a>.
+This project demonstrates a typical <a href="https://owasp.org/API-Security/editions/2023/en/0xa5-broken-function-level-authorization/">BFLA</a> vulnerability, where the API does not secure functions and endpoints that allow a user to execute a flow despite not having the expected privilege. Like BOLA and BOPLA, this issue is often undetectable by static code analysis tools. The project highlights related vulnerabilities such as <a href="https://cwe.mitre.org/data/definitions/285.html">CWE-285: Improper Authorization</a>. To explore the three endpoints, navigate to <a href="http://localhost:YOURPORT/swagger/index.html">http://localhost:YOURPORT/swagger/index.html</a>.
 
 <br>
 <br>
@@ -213,7 +216,7 @@ This insecure endpoint allows the deletion of any user, making it highly dangero
   "username": "normal@normal.com",
 }
 ```
-This endpoint mitigates the risks of the first by requiring the user to authenticate with a JWT and ensuring the user is in the "Admin" role to access it. Although it performs the same function as the insecure endpoint, it is safer as it restricts access to authenticated and authorized users. It employs Role-Based Access Control (RBAC), ensuring that only users with the necessary claims can access it. Additionally, this endpoint returns a dedicated response object that includes the "IsAdmin" field, further enhancing security by confirming user roles.
+This endpoint mitigates the risks of the first by requiring the user to authenticate with a JWT and ensuring the user is in the "Admin" role to access it. Although it performs the same function as the insecure endpoint, it is safer as it restricts access to authenticated and authorized users. It employs Role-Based Access Control (RBAC), ensuring that only users with the required roles can access it. Additionally, this endpoint returns a dedicated response object that includes the "IsAdmin" field, further enhancing security by confirming user roles.
 `No Token:`
 <img src="./ScreenShots/bfla-secure-failed-no-token.png">
 `No Role:`
@@ -279,7 +282,7 @@ This secured endpoint makes a request to any URI provided by the client but firs
 ## Improper Inventory Management
 <details>
 <summary>Improper Inventory Management Details</summary>
-This project demonstrates a typical <a href="https://owasp.org/API-Security/editions/2023/en/0xa9-improper-inventory-management/">Improper Inventory Management</a> vulnerability, where the API does not properly deprecate or protect functions and endpoints; allowing a consumers to access resources from old or beta endpoints when they might not be protected. Like many other vulnerabilities on this list, this issue is often undetectable by static code analysis tools. The project highlights related vulnerabilities such as <a href="https://cwe.mitre.org/data/definitions/1059.html">CWE-1059: Insufficient Technical Documentation</a>. To explore four endpoints, navigate to <a href="http://localhost:YOURPORT/swagger/index.html">http://localhost:YOURPORT/swagger/index.html</a>.
+This project demonstrates a typical <a href="https://owasp.org/API-Security/editions/2023/en/0xa9-improper-inventory-management/">Improper Inventory Management</a> vulnerability, where the API does not properly deprecate or protect functions and endpoints; allowing consumers to access resources from old or beta endpoints when they might not be protected. Like many other vulnerabilities on this list, this issue is often undetectable by static code analysis tools. The project highlights related vulnerabilities such as <a href="https://cwe.mitre.org/data/definitions/1059.html">CWE-1059: Insufficient Technical Documentation</a>. To explore four endpoints, navigate to <a href="http://localhost:YOURPORT/swagger/index.html">http://localhost:YOURPORT/swagger/index.html</a>.
 
 <br>
 <br>
@@ -299,7 +302,7 @@ This secure endpoint functions similarly to the `v1` endpoint but now requires a
 
 `/api/details/`
 **Payload:** `header: api-x-version=2` or `query: ?api-version=2`
-This secure endpoint requires a token from the user with the `username admin@admin.com and password Password1!`. Unlike the previous endpoints, it does not include the version in the route; instead, versioning is handled via headers or query strings. This approach is supported by middleware that manages API versioning and accommodates deprecated endpoints. Attempts to access a deprecated endpoint will result in a `406 Not Acceptable` status code, while requests for non-existent API versions will yield a `400 Bad Request response.` By centralizing API versioning, developers are encouraged to remove outdated versions and deprecate endpoints more effectively. The critical difference here though is `v1` of this API was retired specifically to mitigate potential abuse.
+This secure endpoint requires a token from the user with the `username admin@admin.com and password Password1!`. Unlike the previous endpoints, it does not include the version in the route; instead, versioning is handled via headers or query strings. This approach is supported by middleware that manages API versioning and accommodates deprecated endpoints. Attempts to access a deprecated endpoint will result in a `406 Not Acceptable` status code, while requests for non-existent API versions will yield a `400 Bad Request response.` By centralizing API versioning, developers are encouraged to remove outdated versions and deprecate endpoints more effectively. The critical difference here is `v1` of this API was retired specifically to mitigate potential abuse.
 `No Token:`
 <img src="./ScreenShots/iim-generic-no-token.png">
 `No Claim:`
@@ -333,7 +336,7 @@ This endpoint generates a token for authentication. Note that the identity imple
 ## Security Misconfiguration
 <details>
 <summary>Security Misconfiguration Details</summary>
-This project demonstrates a typical <a href="https://owasp.org/Top10/A05_2021-Security_Misconfiguration/">Security Misconfiguration</a> vulnerability, where the API does has a lack of input sanitization. The API fails to check file types, sizes, or anti forgery tokens before uploads. Security Misconfiguration is a pretty broad vulnerability category and lots of things could fit here, but I wanted to build out a vulnerability that I've seen developers make <a href="https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload">Unrestricted File Uploads</a>. Like many other vulnerabilities on this list, this issue can be undetectable by static code analysis tools. The project highlights related vulnerabilities such as <a href="https://cwe.mitre.org/data/definitions/352.html">CWE-352: Cross-Site Request Forgery (CSRF)</a>, <a href="https://cwe.mitre.org/data/definitions/434.html">CWE-434: Unrestricted Upload of File with Dangerous Type</a>, <a href="https://cwe.mitre.org/data/definitions/646.html">CWE-646: Reliance on File Name or Extension of Externally-Supplied File</a>. To explore three endpoints, navigate to <a href="http://localhost:YOURPORT/swagger/index.html">http://localhost:YOURPORT/swagger/index.html</a>.
+This project demonstrates a typical <a href="https://owasp.org/Top10/A05_2021-Security_Misconfiguration/">Security Misconfiguration</a> vulnerability, where the API has a lack of input sanitization. The API fails to check file types, sizes, or anti forgery tokens before uploads. Security Misconfiguration is a broad vulnerability category and lots of things could fit here, but the goal of the project is to build out a vulnerability that developers frequently introduce: <a href="https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload">Unrestricted File Uploads</a>. Like many other vulnerabilities on this list, this issue can be undetectable by static code analysis tools. The project highlights related vulnerabilities such as <a href="https://cwe.mitre.org/data/definitions/352.html">CWE-352: Cross-Site Request Forgery (CSRF)</a>, <a href="https://cwe.mitre.org/data/definitions/434.html">CWE-434: Unrestricted Upload of File with Dangerous Type</a>, <a href="https://cwe.mitre.org/data/definitions/646.html">CWE-646: Reliance on File Name or Extension of Externally-Supplied File</a>. To explore three endpoints, navigate to <a href="http://localhost:YOURPORT/swagger/index.html">http://localhost:YOURPORT/swagger/index.html</a>.
 
 <br>
 <img src="./ScreenShots/sm-build.png">
@@ -344,7 +347,7 @@ This application disables the read-only file system of the container, which is c
 `/upload/dangerous`
 **Payload:**
 `What Ever File you Want... `
-This endpoint accepts files of any type and size, which poses significant security risks. Such an open policy can lead to various vulnerabilities, including Distributed Denial of Service (DDoS) attacks, Cross-Site Request Forgery (CSRF), and privilege escalation attempts, among others. 
+This endpoint accepts files of any type and size, which poses significant security risks. Such an open policy can lead to various vulnerabilities, such as Distributed Denial of Service (DDoS) attacks, Cross-Site Request Forgery (CSRF), and privilege escalation attempts. 
 <img src="./ScreenShots/sm-dangerous.png">
 
 `/upload/safe`
@@ -357,6 +360,6 @@ This endpoint requires an anti-forgery token in the header to help mitigate CSRF
 <img src="./ScreenShots/sm-safe.png">
 
 `/token`
-This endpoint generates an anti-forgery token to be used by the secure endpoint to help mitigate CSRF/XSRF attacks. In a real API we would want this to be an authenticated endpoint ideally.
+This endpoint generates an anti-forgery token to be used by the secure endpoint to help mitigate CSRF/XSRF attacks. In a real API this endpoint would be authenticated.
 <img src="./ScreenShots/sm-token.png">
 </details>
