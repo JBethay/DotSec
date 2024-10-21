@@ -112,6 +112,7 @@ This endpoint generates a token for authentication. The identity implementation 
 }
 ```
 This endpoint requires a valid JWT token and a valid userId Guid. It critically checks the current user's email against the email of the account details being retrieved. If they do not match, a 401 Unauthorized response is returned. While this solution improves security, further enhancements could include implementing Role-Based Access Control (RBAC) and user access policies to strengthen data protection. Overall, this last approach is significantly more secure than the initial implementation.
+
 `User Mismatch:`
 <img src="./ScreenShots/bola-secure-failed.png">
 `Success:`
@@ -161,7 +162,7 @@ This endpoint generates a token for authentication. The identity implementation 
 This endpoint requires a valid JWT token with the "AdminAccess" claim. It employs policy-based authorization, ensuring that only users with the necessary claims can access it. Although this endpoint returns a dedicated response object that includes the "IsAdmin" field, it enhances security by restricting access to expected users.
 `No Claim:`
 <img src="./ScreenShots/bopla-secure-failed.png">
-`No Success:`
+`Success:`
 <img src="./ScreenShots/bopla-secure-success.png">
 
 `/api/update`
@@ -217,6 +218,7 @@ This insecure endpoint allows the deletion of any user, making it highly dangero
 }
 ```
 This endpoint mitigates the risks of the first by requiring the user to authenticate with a JWT and ensuring the user is in the "Admin" role to access it. Although it performs the same function as the insecure endpoint, it is safer as it restricts access to authenticated and authorized users. It employs Role-Based Access Control (RBAC), ensuring that only users with the required roles can access it. Additionally, this endpoint returns a dedicated response object that includes the "IsAdmin" field, further enhancing security by confirming user roles.
+
 `No Token:`
 <img src="./ScreenShots/bfla-secure-failed-no-token.png">
 `No Role:`
@@ -269,6 +271,7 @@ This insecure endpoint makes a request to any URI provided by the client and ret
 **Payload:**
 ```uri=https://www.google.com:443```
 This secured endpoint makes a request to any URI provided by the client but first: (1) converts the string URI into a safe URI type in C#, performing sanitization checks; (2) compares the scheme, host, and port against allowed lists to validate the request; (3) makes the request using a custom secure HttpClient with automatic redirects disabled; and (4) returns an OK 200 response if successful.
+
 `Success:`
 <img src="./ScreenShots/ssrf-secured.png">
 `Bad Domain:`
@@ -293,6 +296,7 @@ This insecure endpoint permits the retrieval of user details. Although it should
 
 `/api/v2/details/`
 This secure endpoint functions similarly to the `v1` endpoint but now requires a token from the user with the `username admin@admin.com and password Password1!`, due to the enforced authorization policy. Despite these security improvements, the presence of `v2` in the path may inadvertently inform attackers of a potential `v1`, `beta`, `development`, or `admin` endpoint that might be less secure and could be targeted for exploitation.
+
 `No Token:`
 <img src="./ScreenShots/iim-v2-no-token.png">
 `No Claim:`
@@ -303,6 +307,7 @@ This secure endpoint functions similarly to the `v1` endpoint but now requires a
 `/api/details/`
 **Payload:** `header: api-x-version=2` or `query: ?api-version=2`
 This secure endpoint requires a token from the user with the `username admin@admin.com and password Password1!`. Unlike the previous endpoints, it does not include the version in the route; instead, versioning is handled via headers or query strings. This approach is supported by middleware that manages API versioning and accommodates deprecated endpoints. Attempts to access a deprecated endpoint will result in a `406 Not Acceptable` status code, while requests for non-existent API versions will yield a `400 Bad Request response.` By centralizing API versioning, developers are encouraged to remove outdated versions and deprecate endpoints more effectively. The critical difference here is `v1` of this API was retired specifically to mitigate potential abuse.
+
 `No Token:`
 <img src="./ScreenShots/iim-generic-no-token.png">
 `No Claim:`
@@ -354,6 +359,7 @@ This endpoint accepts files of any type and size, which poses significant securi
 **Payload:**
 `.txt files less than 1MB in size, must provide the AntiForgery Token`
 This endpoint requires an anti-forgery token in the header to help mitigate CSRF/XSRF attacks. It verifies the file extension and size to ensure they meet acceptable criteria. Additionally, the endpoint saves the uploaded file without its extension. This step is crucial, especially if the API were to accept various file extensions, as it helps prevent potential security risks associated with executing harmful file types.
+
 `Bad File Extension:`
 <img src="./ScreenShots/sm-safe-blocked.png">
 `Success:`
